@@ -1,0 +1,55 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "db-chart.fullname" . }}
+  labels:
+    {{- include "db-chart.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+  selector:
+    {{- include "db-chart.selectorLabels" . | nindent 4 }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "db-chart.fullname" . }}
+spec:
+  serviceName: "postgres"
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "db-chart.labels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "db-chart.labels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:latest
+          ports:
+            - containerPort: 5432
+              name: postgredb
+          env:
+            - name: POSTGRES_DB
+              value: {{ .Values.externalPostgresql.postgresqlDatabase }}
+            - name: POSTGRES_USER
+              value: {{ .Values.externalPostgresql.postgresqlUsername }}
+            - name: POSTGRES_PASSWORD
+              value: {{ .Values.externalPostgresql.postgresqlPassword }}
+          volumeMounts:
+            - name: postgredb
+              mountPath: /var/lib/postgresql/data
+              subPath: postgres
+  volumeClaimTemplates:
+    - metadata:
+        name: postgredb
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: standard
+        resources:
+          requests:
+            storage: 1Gi

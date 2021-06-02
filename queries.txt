@@ -1,0 +1,3 @@
+avg((sum (rate (container_cpu_usage_seconds_total {container_name!="" ,pod="<Pod name>" } [5m])) by (namespace , pod, container ) / on (container , pod , namespace) ((kube_pod_container_resource_limits_cpu_cores >0)*300))*100)
+
+avg((avg (container_memory_working_set_bytes{pod="<pod name>"}) by (container_name , pod ))/ on (container_name , pod)(avg (container_spec_memory_limit_bytes>0 ) by (container_name, pod))*100)

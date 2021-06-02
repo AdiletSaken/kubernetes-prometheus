@@ -1,0 +1,10 @@
+service:
+  type: NodePort
+  port: 5432
+
+externalPostgresql:
+  postgresqlUsername: myuser
+  postgresqlPassword: passwd
+  postgresqlDatabase: myapp
+  postgresqlHost: "postgres"
+  postgresqlPort: "5432"
